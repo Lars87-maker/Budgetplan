@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gezamenlijk Budgetplan</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1f2937" />
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      margin: 1rem;
+      padding: 1rem;
+      background-color: #f9fafb;
+      color: #333;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      color: #1f2937;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    h2 {
+      margin-top: 2rem;
+      font-size: 1.2rem;
+      color: #374151;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 500;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    .output {
+      margin-top: 1.5rem;
+      background: white;
+      padding: 1.25rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    p {
+      margin: 0.5rem 0;
+      font-size: 0.95rem;
+    }
+
+    .note, .footer-note {
+      font-size: 0.9rem;
+      color: #555;
+      margin: 1rem 0;
+      padding: 0.75rem;
+      background-color: #eef2f7;
+      border-left: 4px solid #3b82f6;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Gezamenlijk Budgetplan</h1>
+
+  <div class="note">
+    <p>Vaste lasten totaal: <strong>€4399</strong>, waarvan <strong>€150 (75 p.p.)</strong> sparen is. <br>
+    Alleen de resterende <strong>€4249</strong> wordt evenredig verdeeld.</p>
+  </div>
+
+  <label for="incomeUser">Inkomen Lars:</label>
+  <input type="number" id="incomeUser" placeholder="Bijv. 4000" />
+
+  <label for="incomePartner">Inkomen Marloes:</label>
+  <input type="number" id="incomePartner" placeholder="Bijv. 3200" />
+
+  <div class="output" id="results">
+    <h2>Gezamenlijke bijdrage</h2>
+    <p><strong>Totaal inkomen:</strong> € <span id="totalIncome">0.00</span></p>
+    <p><strong>Vrij te besteden per persoon:</strong> € <span id="freeToSpend">0.00</span></p>
+    <p><strong>Bijdrage Lars:</strong> € <span id="contributionUser">0.00</span></p>
+    <p><strong>Bijdrage Marloes:</strong> € <span id="contributionPartner">0.00</span></p>
+
+    <h2>Persoonlijke lasten</h2>
+    <p><strong>Vaste lasten Marloes:</strong> € <span id="personalPartner">0.00</span></p>
+    <p><strong>Vrij te besteden Marloes:</strong> € <span id="netPartner">0.00</span></p>
+
+    <p><strong>Vaste lasten Lars:</strong> € <span id="personalUser">0.00</span></p>
+    <p><strong>Vrij te besteden Lars:</strong> € <span id="netUser">0.00</span></p>
+  </div>
+
+  <div class="footer-note">
+    <p>Beide maken we €750 over naar de boodschappenrekening en beide sparen we €75. Deze lasten zijn al meegenomen in de berekening. Het weergegeven vrij te besteden bedrag is dus écht 'vrij te besteden'.</p>
+  </div>
+
+  <script>
+    const incomeUserInput = document.getElementById('incomeUser');
+    const incomePartnerInput = document.getElementById('incomePartner');
+
+    function calculate() {
+      const incomeUser = parseFloat(incomeUserInput.value) || 0;
+      const incomePartner = parseFloat(incomePartnerInput.value) || 0;
+
+      const groceriesPerPerson = 750;
+      const jointSavings = 150;
+      const originalFixedExpenses = 4399;
+      const adjustedFixedExpenses = originalFixedExpenses - jointSavings;
+      const totalIncome = incomeUser + incomePartner;
+
+      const personalExpenses = 2 * groceriesPerPerson;
+      const remaining = totalIncome - adjustedFixedExpenses - personalExpenses;
+      const freeToSpend = Math.max(remaining / 2, 0);
+
+      const proportionalShareUser = (incomeUser / totalIncome) * adjustedFixedExpenses;
+      const proportionalSharePartner = (incomePartner / totalIncome) * adjustedFixedExpenses;
+
+      const personalFixedPartner = 10 + 100 + 18.16 + 5.30 + 9.61 + 10.99 + 0.99 + 1.99 + 99 + 211.95;
+      const personalFixedUser = 100 + 26 + 6.55 + 9.97 + 5.89 + 2 + 25 + 3 + 206.54;
+
+      const netPartner = freeToSpend - personalFixedPartner;
+      const netUser = freeToSpend - personalFixedUser;
+
+      document.getElementById('totalIncome').textContent = totalIncome.toFixed(2);
+      document.getElementById('freeToSpend').textContent = freeToSpend.toFixed(2);
+      document.getElementById('contributionUser').textContent = proportionalShareUser.toFixed(2);
+      document.getElementById('contributionPartner').textContent = proportionalSharePartner.toFixed(2);
+      document.getElementById('personalPartner').textContent = personalFixedPartner.toFixed(2);
+      document.getElementById('personalUser').textContent = personalFixedUser.toFixed(2);
+      document.getElementById('netPartner').textContent = netPartner.toFixed(2);
+      document.getElementById('netUser').textContent = netUser.toFixed(2);
+    }
+
+    incomeUserInput.addEventListener('input', calculate);
+    incomePartnerInput.addEventListener('input', calculate);
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker geregistreerd'))
+        .catch(error => console.error('Registratie mislukt:', error));
+    }
+  </script>
+</body>
+</html>
