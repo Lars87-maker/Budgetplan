@@ -76,6 +76,9 @@
   <label for="incomePartner">Inkomen Marloes:</label>
   <input type="number" id="incomePartner" placeholder="Bijv. 3200" />
 
+  <label for="jointFixedInput">Gezamenlijke vaste lasten:</label>
+  <input type="number" id="jointFixedInput" placeholder="Bijv. 4045" value="4045" />
+
   <div class="output" id="results">
   <p><strong>Totaal inkomen:</strong> € <span id="totalIncome">0.00</span></p>
   <p><strong>Gelijke buffer p.p. (vóór persoonlijke lasten):</strong> € <span id="bufferPerPerson">0.00</span></p>
@@ -102,7 +105,7 @@
 
   // Parameters
   const perPersonBase = 825;        // 750 boodschappen + 75 sparen p.p.
-  const jointFixed = 4045;          // gezamenlijke vaste lasten (excl. sparen, want dat zit in 825)
+  const jointFixed = parseFloat(document.getElementById('jointFixedInput').value) || 0;
   const totalIncome = incomeUser + incomePartner;
 
   // Doel: dezelfde buffer voor iedereen vóór persoonlijke vaste lasten
