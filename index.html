@@ -100,39 +100,44 @@
     const incomePartnerInput = document.getElementById('incomePartner');
 
     function calculate() {
-      const incomeUser = parseFloat(incomeUserInput.value) || 0;
-      const incomePartner = parseFloat(incomePartnerInput.value) || 0;
+  const incomeUser = parseFloat(incomeUserInput.value) || 0;
+  const incomePartner = parseFloat(incomePartnerInput.value) || 0;
 
-      const groceriesPerPerson = 750;
-      const jointSavings = 150;
-      const originalFixedExpenses = 4399;
-      const adjustedFixedExpenses = originalFixedExpenses - jointSavings;
-      const totalIncome = incomeUser + incomePartner;
+  // Parameters from your original file
+  const groceriesPerPerson = 750;
+  const jointSavings = 150;
+  const originalFixedExpenses = 4399;
+  const adjustedFixedExpenses = originalFixedExpenses - jointSavings; // gezamenlijke vaste lasten die in de pot moeten
+  const totalIncome = incomeUser + incomePartner;
 
-      const personalExpenses = 2 * groceriesPerPerson;
-      const remaining = totalIncome - adjustedFixedExpenses - personalExpenses;
-      const freeToSpend = Math.max(remaining / 2, 0);
+  // --- Scenario: GELIJKE BUFFER VOOR IEDEREEN ---
+  // Vrij te besteden vóór persoonlijke vaste lasten (gelijke buffer)
+  const freeToSpend = Math.max((totalIncome - adjustedFixedExpenses - 2 * groceriesPerPerson) / 2, 0);
 
-      const proportionalShareUser = (incomeUser / totalIncome) * adjustedFixedExpenses;
-      const proportionalSharePartner = (incomePartner / totalIncome) * adjustedFixedExpenses;
+  // Bijdrage aan de gezamenlijke pot die nodig is om bovenstaande buffer te realiseren
+  // (Let op: dit is NIET naar rato, dit is doel-gedreven bijdragen)
+  const contributionUser = Math.max(incomeUser - groceriesPerPerson - freeToSpend, 0);
+  const contributionPartner = Math.max(incomePartner - groceriesPerPerson - freeToSpend, 0);
 
-      const personalFixedPartner = 10 + 100 + 18.16 + 5.30 + 9.61 + 10.99 + 0.99 + 1.99 + 99 + 211.95;
-      const personalFixedUser = 100 + 26 + 6.55 + 9.97 + 5.89 + 2 + 25 + 3 + 206.54;
+  // Persoonlijke vaste lasten (ongewijzigd uit je bestand)
+  const personalFixedPartner = 10 + 100 + 18.16 + 5.30 + 9.61 + 10.99 + 0.99 + 1.99 + 99 + 211.95;
+  const personalFixedUser = 100 + 26 + 6.55 + 9.97 + 5.89 + 2 + 25 + 3 + 206.54;
 
-      const netPartner = freeToSpend - personalFixedPartner;
-      const netUser = freeToSpend - personalFixedUser;
+  // Echte vrij te besteden bedragen ná persoonlijke vaste lasten
+  const netPartner = freeToSpend - personalFixedPartner;
+  const netUser = freeToSpend - personalFixedUser;
 
-      document.getElementById('totalIncome').textContent = totalIncome.toFixed(2);
-      document.getElementById('freeToSpend').textContent = freeToSpend.toFixed(2);
-      document.getElementById('contributionUser').textContent = proportionalShareUser.toFixed(2);
-      document.getElementById('contributionPartner').textContent = proportionalSharePartner.toFixed(2);
-      document.getElementById('personalPartner').textContent = personalFixedPartner.toFixed(2);
-      document.getElementById('personalUser').textContent = personalFixedUser.toFixed(2);
-      document.getElementById('netPartner').textContent = netPartner.toFixed(2);
-      document.getElementById('netUser').textContent = netUser.toFixed(2);
-    }
-
-    incomeUserInput.addEventListener('input', calculate);
+  // UI
+  document.getElementById('totalIncome').textContent = totalIncome.toFixed(2);
+  document.getElementById('freeToSpend').textContent = freeToSpend.toFixed(2);
+  document.getElementById('contributionUser').textContent = contributionUser.toFixed(2);
+  document.getElementById('contributionPartner').textContent = contributionPartner.toFixed(2);
+  document.getElementById('personalPartner').textContent = personalFixedPartner.toFixed(2);
+  document.getElementById('personalUser').textContent = personalFixedUser.toFixed(2);
+  document.getElementById('netPartner').textContent = netPartner.toFixed(2);
+  document.getElementById('netUser').textContent = netUser.toFixed(2);
+}
+incomeUserInput.addEventListener('input', calculate);
     incomePartnerInput.addEventListener('input', calculate);
   </script>
 
