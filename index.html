@@ -77,20 +77,16 @@
   <input type="number" id="incomePartner" placeholder="Bijv. 3200" />
 
   <div class="output" id="results">
-    <h2>Gezamenlijke bijdrage</h2>
-    <p><strong>Totaal inkomen:</strong> € <span id="totalIncome">0.00</span></p>
-<p><strong>Gezamenlijk sparen (totaal):</strong> € <span id="jointSavings">150.00</span></p>
-    <p><strong>Vrij te besteden per persoon:</strong> € <span id="freeToSpend">0.00</span></p>
-    <p><strong>Bijdrage Lars:</strong> € <span id="contributionUser">0.00</span></p>
-    <p><strong>Bijdrage Marloes:</strong> € <span id="contributionPartner">0.00</span></p>
-
-    <h2>Persoonlijke lasten</h2>
-    <p><strong>Vaste lasten Marloes:</strong> € <span id="personalPartner">0.00</span></p>
-    <p><strong>Vrij te besteden Marloes:</strong> € <span id="netPartner">0.00</span></p>
-
-    <p><strong>Vaste lasten Lars:</strong> € <span id="personalUser">0.00</span></p>
-    <p><strong>Vrij te besteden Lars:</strong> € <span id="netUser">0.00</span></p>
-  </div>
+  <p><strong>Totaal inkomen:</strong> € <span id="totalIncome">0.00</span></p>
+  <p><strong>Gelijke buffer p.p. (vóór persoonlijke lasten):</strong> € <span id="bufferPerPerson">0.00</span></p>
+  <p><strong>Bijdrage vaste lasten Lars:</strong> € <span id="contributionUser">0.00</span></p>
+  <p><strong>Bijdrage vaste lasten Marloes:</strong> € <span id="contributionPartner">0.00</span></p>
+  <p><strong>Persoonlijke vaste lasten Marloes:</strong> € <span id="personalPartner">0.00</span></p>
+  <p><strong>Vrij te besteden ná persoonlijke lasten Marloes:</strong> € <span id="netPartner">0.00</span></p>
+  <p><strong>Persoonlijke vaste lasten Lars:</strong> € <span id="personalUser">0.00</span></p>
+  <p><strong>Vrij te besteden ná persoonlijke lasten Lars:</strong> € <span id="netUser">0.00</span></p>
+  <p id="warning" style="color:#b91c1c; font-weight:600; display:none;"></p>
+</div>
 
   <div class="footer-note">
     <p>Beide maken we €750 over naar de boodschappenrekening en beide sparen we €75. Deze lasten zijn al meegenomen in de berekening. Het weergegeven vrij te besteden bedrag is dus écht 'vrij te besteden'.</p>
@@ -104,40 +100,54 @@
   const incomeUser = parseFloat(incomeUserInput.value) || 0;
   const incomePartner = parseFloat(incomePartnerInput.value) || 0;
 
-  // Parameters from your original file
-  const groceriesPerPerson = 750;
-  const jointSavings = 150;
-  const originalFixedExpenses = 4045;
-  const adjustedFixedExpenses = originalFixedExpenses + jointSavings; // inclusief €75 p.p. sparen (totaal €150) // gezamenlijke vaste lasten die in de pot moeten
+  // Parameters
+  const perPersonBase = 825;        // 750 boodschappen + 75 sparen p.p.
+  const jointFixed = 4399;          // gezamenlijke vaste lasten (excl. sparen, want dat zit in 825)
   const totalIncome = incomeUser + incomePartner;
 
-  // --- Scenario: GELIJKE BUFFER VOOR IEDEREEN ---
-  // Vrij te besteden vóór persoonlijke vaste lasten (gelijke buffer)
-  const freeToSpend = Math.max((totalIncome - adjustedFixedExpenses - 2 * groceriesPerPerson) / 2, 0);
+  // Doel: dezelfde buffer voor iedereen vóór persoonlijke vaste lasten
+  // B = ((I1 + I2) - 2*825 - jointFixed) / 2
+  let bufferPerPerson = (totalIncome - 2 * perPersonBase - jointFixed) / 2;
+  if (bufferPerPerson < 0) bufferPerPerson = 0;
 
-  // Bijdrage aan de gezamenlijke pot die nodig is om bovenstaande buffer te realiseren
-  // (Let op: dit is NIET naar rato, dit is doel-gedreven bijdragen)
-  const contributionUser = Math.max(incomeUser - groceriesPerPerson - freeToSpend, 0);
-  const contributionPartner = Math.max(incomePartner - groceriesPerPerson - freeToSpend, 0);
+  // Bijdragen die daarbij horen
+  let contributionUser    = incomeUser    - perPersonBase - bufferPerPerson;
+  let contributionPartner = incomePartner - perPersonBase - bufferPerPerson;
 
-  // Persoonlijke vaste lasten (ongewijzigd uit je bestand)
+  // Clamp op 0: niemand kan méér bijdragen dan zijn/haar inkomen minus 825 en buffer
+  contributionUser = Math.max(contributionUser, 0);
+  contributionPartner = Math.max(contributionPartner, 0);
+
+  // Check of de gezamenlijke vaste lasten volledig gedekt zijn
+  const covered = contributionUser + contributionPartner;
+  const shortfall = jointFixed - covered;
+
+  // Persoonlijke vaste lasten (uit je bestand)
   const personalFixedPartner = 10 + 100 + 18.16 + 5.30 + 9.61 + 10.99 + 0.99 + 1.99 + 99 + 211.95;
-  const personalFixedUser = 100 + 26 + 6.55 + 9.97 + 5.89 + 2 + 25 + 3 + 206.54;
+  const personalFixedUser    = 100 + 26 + 6.55 + 9.97 + 5.89 + 2 + 25 + 3 + 206.54;
 
-  // Echte vrij te besteden bedragen ná persoonlijke vaste lasten
-  const netPartner = freeToSpend - personalFixedPartner;
-  const netUser = freeToSpend - personalFixedUser;
+  // Netto vrij te besteden ná persoonlijke vaste lasten
+  const netUser    = bufferPerPerson - personalFixedUser;
+  const netPartner = bufferPerPerson - personalFixedPartner;
 
   // UI
   document.getElementById('totalIncome').textContent = totalIncome.toFixed(2);
-  document.getElementById('jointSavings').textContent = jointSavings.toFixed(2);
-  document.getElementById('freeToSpend').textContent = freeToSpend.toFixed(2);
+  document.getElementById('bufferPerPerson').textContent = bufferPerPerson.toFixed(2);
   document.getElementById('contributionUser').textContent = contributionUser.toFixed(2);
   document.getElementById('contributionPartner').textContent = contributionPartner.toFixed(2);
   document.getElementById('personalPartner').textContent = personalFixedPartner.toFixed(2);
   document.getElementById('personalUser').textContent = personalFixedUser.toFixed(2);
   document.getElementById('netPartner').textContent = netPartner.toFixed(2);
   document.getElementById('netUser').textContent = netUser.toFixed(2);
+
+  const warn = document.getElementById('warning');
+  if (shortfall > 0.005) {
+    warn.style.display = 'block';
+    warn.textContent = 'Waarschuwing: gezamenlijke vaste lasten zijn niet volledig gedekt. Tekort: € ' + shortfall.toFixed(2);
+  } else {
+    warn.style.display = 'none';
+    warn.textContent = '';
+  }
 }
 incomeUserInput.addEventListener('input', calculate);
     incomePartnerInput.addEventListener('input', calculate);
