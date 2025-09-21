@@ -100,55 +100,55 @@
     const incomePartnerInput = document.getElementById('incomePartner');
 
     
-    function calculate() {
-      const incomeUser = parseFloat(incomeUserInput.value) || 0;
-      const incomePartner = parseFloat(incomePartnerInput.value) || 0;
+      function calculate() {
+        const incomeUser = parseFloat(incomeUserInput.value) || 0;
+        const incomePartner = parseFloat(incomePartnerInput.value) || 0;
 
-      const jointFixed = parseFloat(document.getElementById('jointFixedInput').value) || 0;
-      const personalFixedUser = parseFloat(document.getElementById('personalUserInput').value) || 0;
-      const personalFixedPartner = parseFloat(document.getElementById('personalPartnerInput').value) || 0;
+        const jointFixed = parseFloat(document.getElementById('jointFixedInput').value) || 0;
+        const personalFixedUser = parseFloat(document.getElementById('personalUserInput').value) || 0;
+        const personalFixedPartner = parseFloat(document.getElementById('personalPartnerInput').value) || 0;
 
-      // Iedereen betaalt sowieso €825 p.p. (750 boodschappen + 75 sparen)
-      const perPersonBase = 825;
-      const totalIncome = incomeUser + incomePartner;
+        // Iedereen betaalt €825 p.p. (750 boodschappen + 75 sparen)
+        const perPersonBase = 825;
+        const totalIncome = incomeUser + incomePartner;
 
-      // Gelijke buffer p.p. vóór persoonlijke vaste lasten
-      let bufferPerPerson = (totalIncome - 2 * perPersonBase - jointFixed) / 2;
-      if (bufferPerPerson < 0) bufferPerPerson = 0;
+        // Gelijke buffer per persoon vóór persoonlijke vaste lasten
+        let bufferPerPerson = (totalIncome - 2 * perPersonBase - jointFixed) / 2;
+        if (bufferPerPerson < 0) bufferPerPerson = 0;
 
-      // Benodigde bijdragen om die buffer te realiseren
-      let contributionUser = incomeUser - perPersonBase - bufferPerPerson;
-      let contributionPartner = incomePartner - perPersonBase - bufferPerPerson;
-      contributionUser = Math.max(contributionUser, 0);
-      contributionPartner = Math.max(contributionPartner, 0);
+        // Bijdrage aan gezamenlijke vaste lasten die nodig is voor die buffer
+        let contributionUser = incomeUser - perPersonBase - bufferPerPerson;
+        let contributionPartner = incomePartner - perPersonBase - bufferPerPerson;
+        contributionUser = Math.max(contributionUser, 0);
+        contributionPartner = Math.max(contributionPartner, 0);
 
-      // Controle op dekking van gezamenlijke vaste lasten
-      const covered = contributionUser + contributionPartner;
-      const shortfall = jointFixed - covered;
+        // Controle op dekking
+        const covered = contributionUser + contributionPartner;
+        const shortfall = jointFixed - covered;
 
-      // Netto vrij te besteden na persoonlijke vaste lasten
-      const netUser = bufferPerPerson - personalFixedUser;
-      const netPartner = bufferPerPerson - personalFixedPartner;
+        // Vrij te besteden ná persoonlijke vaste lasten
+        const netUser = bufferPerPerson - personalFixedUser;
+        const netPartner = bufferPerPerson - personalFixedPartner;
 
-      // UI updates
-      document.getElementById('totalIncome').textContent = totalIncome.toFixed(2);
-      document.getElementById('bufferPerPerson').textContent = bufferPerPerson.toFixed(2);
-      document.getElementById('contributionUser').textContent = contributionUser.toFixed(2);
-      document.getElementById('contributionPartner').textContent = contributionPartner.toFixed(2);
-      document.getElementById('personalPartner').textContent = personalFixedPartner.toFixed(2);
-      document.getElementById('personalUser').textContent = personalFixedUser.toFixed(2);
-      document.getElementById('netPartner').textContent = netPartner.toFixed(2);
-      document.getElementById('netUser').textContent = netUser.toFixed(2);
+        // UI
+        document.getElementById('totalIncome').textContent = totalIncome.toFixed(2);
+        document.getElementById('bufferPerPerson').textContent = bufferPerPerson.toFixed(2);
+        document.getElementById('contributionUser').textContent = contributionUser.toFixed(2);
+        document.getElementById('contributionPartner').textContent = contributionPartner.toFixed(2);
+        document.getElementById('personalPartner').textContent = personalFixedPartner.toFixed(2);
+        document.getElementById('personalUser').textContent = personalFixedUser.toFixed(2);
+        document.getElementById('netPartner').textContent = netPartner.toFixed(2);
+        document.getElementById('netUser').textContent = netUser.toFixed(2);
 
-      const warn = document.getElementById('warning');
-      if (shortfall > 0.005) {
-        warn.style.display = 'block';
-        warn.textContent = 'Waarschuwing: gezamenlijke vaste lasten zijn niet volledig gedekt. Tekort: € ' + shortfall.toFixed(2);
-      } else {
-        warn.style.display = 'none';
-        warn.textContent = '';
+        const warn = document.getElementById('warning');
+        if (shortfall > 0.005) {
+          warn.style.display = 'block';
+          warn.textContent = 'Waarschuwing: gezamenlijke vaste lasten zijn niet volledig gedekt. Tekort: € ' + shortfall.toFixed(2);
+        } else {
+          warn.style.display = 'none';
+          warn.textContent = '';
+        }
       }
-    }
 else {
     warn.style.display = 'none';
     warn.textContent = '';
@@ -156,7 +156,11 @@ else {
 }
 incomeUserInput.addEventListener('input', calculate);
     incomePartnerInput.addEventListener('input', calculate);
-  </script>
+    document.getElementById('jointFixedInput').addEventListener('input', calculate);
+  document.getElementById('personalUserInput').addEventListener('input', calculate);
+  document.getElementById('personalPartnerInput').addEventListener('input', calculate);
+  calculate();
+</script>
 
   <script>
     if ('serviceWorker' in navigator) {
